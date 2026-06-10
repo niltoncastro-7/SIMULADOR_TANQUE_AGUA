@@ -760,21 +760,24 @@
        LOGIN
     ========================== */
     loginForm.addEventListener("submit", function (event) {
-      event.preventDefault();
+  event.preventDefault();
 
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-      if (username === VALID_USER && password === VALID_PASSWORD) {
-        loginError.style.display = "none";
-        loginScreen.style.display = "none";
-        dashboard.style.display = "block";
-        addAlert("Inicio de sesión correcto. Sistema en línea.", "success");
-        updateUI();
-      } else {
-        loginError.style.display = "block";
-      }
-    });
+  console.log("Usuario:", username);
+  console.log("Contraseña:", password);
+
+  if (username === "admin" && password === "1234") {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+
+    addAlert("Inicio de sesión correcto. Sistema en línea.", "success");
+    updateUI();
+  } else {
+    document.getElementById("loginError").style.display = "block";
+  }
+});
 
     logoutBtn.addEventListener("click", function () {
       automationActive = false;
