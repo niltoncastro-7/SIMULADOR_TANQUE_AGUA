@@ -1,547 +1,290 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Control Automático de Tanque</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMI SCADA Tanque</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      min-height: 100vh;
-      background: #071018;
-      color: white;
-    }
-
-    .project-title {
-      width: 100%;
-      text-align: center;
-      padding: 18px;
-      background: #0b1622;
-      border-bottom: 1px solid #2c3e50;
-      font-size: 24px;
-      font-weight: bold;
-      color: #38bdf8;
-      letter-spacing: 1px;
-    }
-
-    .login,
-    .dashboard {
-      min-height: calc(100vh - 65px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 430px;
-      background: #111c27;
-      border: 1px solid #2c3e50;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    }
-
-    h1, h2, h3 {
-      margin-bottom: 15px;
-    }
-
-    p {
-      color: #9ca3af;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      margin: 10px 0 18px;
-      border-radius: 10px;
-      border: 1px solid #3b4b5c;
-      background: #071018;
-      color: white;
-      outline: none;
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 14px 18px;
-      cursor: pointer;
-      font-weight: bold;
-      color: white;
-      background: #2563eb;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.02);
-    }
-
-    .error {
-      display: none;
-      margin-top: 15px;
-      color: #ffb4b4;
-      background: #4a1010;
-      padding: 10px;
-      border-radius: 10px;
-    }
-
-    .dashboard {
-      display: none;
-      align-items: flex-start;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 1100px;
-      padding: 20px;
-    }
-
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #111c27;
-      padding: 18px;
-      border-radius: 18px;
-      margin-bottom: 20px;
-      border: 1px solid #2c3e50;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .panel {
-      background: #111c27;
-      border: 1px solid #2c3e50;
-      border-radius: 18px;
-      padding: 22px;
-    }
-
-    .tank-box {
-      display: flex;
-      gap: 25px;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .tank {
-      width: 160px;
-      height: 330px;
-      border: 4px solid #64748b;
-      border-radius: 20px;
-      overflow: hidden;
-      position: relative;
-      background: #08111a;
-    }
-
-    .water {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 50%;
-      background: #22c55e;
-      transition: 0.25s;
-    }
-
-    .level {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: bold;
-      z-index: 2;
-      text-shadow: 0 0 8px black;
-    }
-
-    .data {
-      background: #172434;
-      padding: 15px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      border: 1px solid #2c3e50;
-    }
-
-    .data span {
-      color: #9ca3af;
-      font-size: 14px;
-    }
-
-    .data strong {
-      display: block;
-      font-size: 23px;
-      margin-top: 6px;
-    }
-
-    .buttons {
-      display: grid;
-      gap: 12px;
-    }
-
-    .start {
-      background: #16a34a;
-    }
-
-    .stop {
-      background: #dc2626;
-    }
-
-    .manual {
-      background: #334155;
-    }
-
-    .active {
-      background: #0891b2;
-    }
-
-    .status {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .status div {
-      background: #172434;
-      padding: 12px;
-      border-radius: 12px;
-      border-left: 5px solid #38bdf8;
-    }
-
-    .alerts {
-      margin-top: 15px;
-      max-height: 210px;
-      overflow-y: auto;
-    }
-
-    .alert {
-      background: #071018;
-      border-left: 5px solid #38bdf8;
-      padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .red {
-      color: #f87171;
-    }
-
-    .yellow {
-      color: #facc15;
-    }
-
-    .green {
-      color: #22c55e;
-    }
-
-    @media (max-width: 800px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .top {
-        flex-direction: column;
-        gap: 12px;
-        text-align: center;
-      }
-
-      .project-title {
-        font-size: 18px;
-      }
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#07111d;color:white}
+.top{padding:16px;text-align:center;color:#38bdf8;font-weight:800;background:#0b1726}
+.box{max-width:1100px;margin:auto;padding:18px}
+.card{background:#132235;border:1px solid #2d4058;border-radius:16px;padding:18px;margin-bottom:16px}
+input,button{width:100%;padding:12px;border-radius:10px;margin:7px 0}
+input{background:#08131f;color:white;border:1px solid #38506b}
+button{border:0;font-weight:800;color:white;cursor:pointer}
+.ok{background:#22c55e}.bad{background:#ef4444}.blue{background:#334155}
+.login{min-height:85vh;display:grid;place-items:center}
+.login .card{width:min(390px,92%)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:#1b2b40;border-radius:12px;padding:14px}
+.kpi b{font-size:25px}
+.muted{color:#a9b6c6}
+.tank{width:140px;height:250px;border:5px solid #8fa3bd;border-radius:28px 28px 16px 16px;overflow:hidden;background:#06101a;position:relative;margin:auto}
+.water{position:absolute;bottom:0;width:100%;height:50%;background:#22c55e;transition:.4s}
+.pct{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;font-weight:900;text-shadow:0 2px 8px black}
+.row{display:flex;gap:10px}
+.row button{flex:1}
+.log{background:#08131f;border-radius:12px;padding:12px;min-height:110px}
+.alarm{color:#fecaca}.warn{color:#fde68a}.normal{color:#86efac}
+canvas{width:100%;height:250px;background:#08131f;border-radius:12px}
+@media(max-width:760px){.grid,.kpis{grid-template-columns:1fr}.row{display:block}}
+</style>
 </head>
 
 <body>
+<div class="top">Proyecto de Nilton Castro - 228660</div>
 
-  <div class="project-title">
-    Proyecto de Nilton Castro - 228660
+<section id="login" class="login">
+  <div class="card">
+    <h2>Ingreso HMI/SCADA</h2>
+    <p class="muted">Usuario: <b>admin</b> | Contraseña: <b>admin123</b></p>
+
+    <input id="usuario" placeholder="Usuario">
+    <input id="clave" type="password" placeholder="Contraseña">
+
+    <button class="ok" onclick="entrar()">ENTRAR</button>
+    <p id="mensaje" class="alarm"></p>
+  </div>
+</section>
+
+<main id="app" class="box" style="display:none">
+
+  <div class="card">
+    <h2>HMI/SCADA - Tanque de Agua</h2>
+    <p class="muted">Fecha y hora: <span id="hora"></span></p>
+    <button class="bad" onclick="salir()">Cerrar sesión</button>
   </div>
 
-  <!-- LOGIN -->
-  <section class="login" id="login">
+  <div class="kpis">
+    <div class="kpi"><span class="muted">Nivel</span><br><b id="nivelTxt">50%</b></div>
+    <div class="kpi"><span class="muted">Temperatura</span><br><b id="tempTxt">38°C</b></div>
+    <div class="kpi"><span class="muted">Caudal</span><br><b id="caudalTxt">0 L/min</b></div>
+    <div class="kpi"><span class="muted">Presión</span><br><b id="presionTxt">2.1 bar</b></div>
+  </div>
+
+  <div class="grid">
     <div class="card">
-      <h1>💧 Acceso HMI</h1>
-      <p>Sistema Industrial de Control Automático de Tanque de Agua</p>
+      <h3>Visualización del tanque</h3>
 
-      <form id="loginForm">
-        <label>Usuario</label>
-        <input type="text" id="user" placeholder="Ingrese usuario" />
-
-        <label>Contraseña</label>
-        <input type="password" id="pass" placeholder="Ingrese contraseña" />
-
-        <button type="submit" style="width:100%;">Ingresar al Sistema</button>
-
-        <div class="error" id="error">
-          Usuario o contraseña incorrectos. Use admin / 1234.
-        </div>
-      </form>
-    </div>
-  </section>
-
-  <!-- PANEL PRINCIPAL -->
-  <section class="dashboard" id="dashboard">
-    <div class="container">
-
-      <div class="top">
-        <div>
-          <h2>⚙️ Panel de Control de Tanque</h2>
-          <p>Simulación industrial automática y manual</p>
-        </div>
-
-        <button class="stop" onclick="cerrarSesion()">Cerrar sesión</button>
+      <div class="tank">
+        <div id="agua" class="water"></div>
+        <div id="porcentaje" class="pct">50%</div>
       </div>
 
-      <div class="grid">
+      <h3 id="estado" class="normal">Estado: NORMAL</h3>
 
-        <!-- TANQUE -->
-        <div class="panel">
-          <h3>Visualización del Tanque</h3>
-
-          <div class="tank-box">
-            <div class="tank">
-              <div class="water" id="water"></div>
-              <div class="level" id="levelText">50%</div>
-            </div>
-
-            <div>
-              <div class="data">
-                <span>Nivel actual</span>
-                <strong id="percent">50%</strong>
-              </div>
-
-              <div class="data">
-                <span>Volumen estimado</span>
-                <strong id="liters">5000 L</strong>
-              </div>
-
-              <div class="data">
-                <span>Estado del tanque</span>
-                <strong id="tankState" class="green">NORMAL</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="status">
-            <div>Sistema: <strong id="systemState" class="green">En línea</strong></div>
-            <div>Válvula de entrada: <strong id="inValve">Cerrada</strong></div>
-            <div>Válvula de salida: <strong id="outValve">Cerrada</strong></div>
-          </div>
-        </div>
-
-        <!-- CONTROLES -->
-        <div class="panel">
-          <h3>Panel de Control</h3>
-
-          <div class="buttons">
-            <button class="start" onclick="iniciarAuto()">INICIAR AUTOMATIZACIÓN</button>
-            <button class="stop" onclick="detenerTodo()">DETENER</button>
-            <button class="manual" id="btnEntrada" onclick="toggleEntrada()">Bomba Entrada: OFF</button>
-            <button class="manual" id="btnSalida" onclick="toggleSalida()">Bomba Salida: OFF</button>
-          </div>
-
-          <h3 style="margin-top:25px;">Registro de Alertas</h3>
-          <div class="alerts" id="alerts"></div>
-        </div>
-
-      </div>
+      <p>Bomba entrada: <b id="bombaEntradaTxt">OFF</b></p>
+      <p>Válvula entrada: <b id="entradaTxt">CERRADA</b></p>
+      <p>Válvula salida: <b id="salidaTxt">ABIERTA</b></p>
+      <p>Modo: <b>AUTOMÁTICO</b></p>
     </div>
-  </section>
 
-  <script>
-    const USUARIO = "nilton";
-    const CONTRASENA = "228660";
+    <div class="card">
+      <h3>Panel de control</h3>
 
-    let nivel = 50;
-    let automatico = false;
-    let bombaEntrada = false;
-    let bombaSalida = false;
-    let ultimaAlerta = "";
+      <div class="row">
+        <button class="ok" onclick="iniciar()">INICIAR</button>
+        <button class="bad" onclick="detener()">DETENER</button>
+      </div>
 
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+      <p class="muted">
+        Funcionamiento: el tanque se vacía solo. Al llegar a 20%, la bomba se activa y llena hasta 85%.
+      </p>
 
-      const user = document.getElementById("user").value.trim();
-      const pass = document.getElementById("pass").value.trim();
+      <h3>Alarmas</h3>
+      <div id="alarmas" class="log"></div>
+    </div>
+  </div>
 
-      if (user === USUARIO && pass === CONTRASENA) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("dashboard").style.display = "flex";
-        alerta("Ingreso correcto al sistema.");
-        actualizarPantalla();
-      } else {
-        document.getElementById("error").style.display = "block";
-      }
-    });
+  <div class="card">
+    <h3>Tendencia: nivel del tanque vs. tiempo</h3>
+    <canvas id="grafico" width="900" height="250"></canvas>
+  </div>
 
-    function cerrarSesion() {
-      document.getElementById("dashboard").style.display = "none";
-      document.getElementById("login").style.display = "flex";
-      document.getElementById("loginForm").reset();
-      detenerTodo();
+</main>
+
+<script>
+let nivel = 50;
+let temperatura = 38;
+let caudal = 8;
+let presion = 2.1;
+
+let sistemaActivo = false;
+let llenando = false;
+
+let historial = [];
+
+function entrar(){
+  let user = document.getElementById("usuario").value.trim().toLowerCase();
+  let pass = document.getElementById("clave").value.trim();
+
+  if(user === "admin" && pass === "admin123"){
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("mensaje").textContent = "";
+  }else{
+    document.getElementById("mensaje").textContent = "Usuario o contraseña incorrectos";
+  }
+}
+
+function salir(){
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login").style.display = "grid";
+  document.getElementById("clave").value = "";
+}
+
+function iniciar(){
+  sistemaActivo = true;
+}
+
+function detener(){
+  sistemaActivo = false;
+  llenando = false;
+  caudal = 0;
+}
+
+function simular(){
+  document.getElementById("hora").textContent = new Date().toLocaleString();
+
+  if(sistemaActivo){
+
+    if(nivel <= 20){
+      llenando = true;
     }
 
-    function iniciarAuto() {
-      automatico = true;
-      alerta("Automatización iniciada.");
+    if(nivel >= 85){
+      llenando = false;
     }
 
-    function detenerTodo() {
-      automatico = false;
-      bombaEntrada = false;
-      bombaSalida = false;
-      alerta("Sistema detenido. Bombas apagadas.");
-      actualizarPantalla();
+    if(llenando){
+      nivel += 1.8;
+      caudal = 12 + Math.random() * 4;
+    }else{
+      nivel -= 0.9;
+      caudal = 6 + Math.random() * 3;
     }
 
-    function toggleEntrada() {
-      bombaEntrada = !bombaEntrada;
+    temperatura += Math.random() * 0.4 - 0.15;
 
-      if (bombaEntrada) {
-        bombaSalida = false;
-        alerta("Bomba de entrada encendida.");
-      } else {
-        alerta("Bomba de entrada apagada.");
-      }
+  }else{
+    caudal = 0;
+  }
 
-      actualizarPantalla();
+  nivel = Math.max(0, Math.min(100, nivel));
+  temperatura = Math.max(25, Math.min(70, temperatura));
+  presion = 0.8 + nivel / 40 + (llenando ? 0.3 : 0);
+
+  historial.push(nivel);
+  if(historial.length > 35) historial.shift();
+
+  pintar();
+}
+
+function pintar(){
+  document.getElementById("nivelTxt").textContent = nivel.toFixed(0) + "%";
+  document.getElementById("tempTxt").textContent = temperatura.toFixed(1) + "°C";
+  document.getElementById("caudalTxt").textContent = caudal.toFixed(1) + " L/min";
+  document.getElementById("presionTxt").textContent = presion.toFixed(1) + " bar";
+
+  document.getElementById("agua").style.height = nivel + "%";
+  document.getElementById("porcentaje").textContent = nivel.toFixed(0) + "%";
+
+  document.getElementById("bombaEntradaTxt").textContent = llenando ? "ON" : "OFF";
+  document.getElementById("entradaTxt").textContent = llenando ? "ABIERTA" : "CERRADA";
+  document.getElementById("salidaTxt").textContent = llenando ? "CERRADA" : "ABIERTA";
+
+  let listaAlarmas = [];
+
+  if(!sistemaActivo){
+    listaAlarmas.push("<p class='warn'>Sistema detenido</p>");
+  }
+
+  if(nivel > 90){
+    listaAlarmas.push("<p class='alarm'>Alarma: nivel alto mayor a 90%</p>");
+  }
+
+  if(nivel < 20){
+    listaAlarmas.push("<p class='warn'>Advertencia: nivel bajo, inicia llenado automático</p>");
+  }
+
+  if(temperatura > 60){
+    listaAlarmas.push("<p class='alarm'>Alarma: temperatura mayor a 60°C</p>");
+  }
+
+  if(sistemaActivo && llenando && caudal < 1){
+    listaAlarmas.push("<p class='alarm'>Falla: bomba activa sin caudal</p>");
+  }
+
+  if(listaAlarmas.length === 0){
+    listaAlarmas.push("<p class='normal'>Sistema normal: ciclo automático funcionando</p>");
+  }
+
+  document.getElementById("alarmas").innerHTML = listaAlarmas.join("");
+
+  let estado = document.getElementById("estado");
+
+  if(nivel > 90 || temperatura > 60){
+    estado.textContent = "Estado: ALARMA";
+    estado.className = "alarm";
+    document.getElementById("agua").style.background = "#ef4444";
+  }else if(nivel < 25){
+    estado.textContent = "Estado: ADVERTENCIA";
+    estado.className = "warn";
+    document.getElementById("agua").style.background = "#facc15";
+  }else{
+    estado.textContent = "Estado: NORMAL";
+    estado.className = "normal";
+    document.getElementById("agua").style.background = "#22c55e";
+  }
+
+  graficar();
+}
+
+function graficar(){
+  let canvas = document.getElementById("grafico");
+  let ctx = canvas.getContext("2d");
+  let w = canvas.width;
+  let h = canvas.height;
+
+  ctx.clearRect(0,0,w,h);
+
+  ctx.strokeStyle = "#334155";
+  ctx.lineWidth = 1;
+
+  for(let i = 0; i < 5; i++){
+    ctx.beginPath();
+    ctx.moveTo(40, 20 + i * 45);
+    ctx.lineTo(w - 20, 20 + i * 45);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = "#38bdf8";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+
+  historial.forEach((valor, i) => {
+    let x = 40 + i * ((w - 70) / 34);
+    let y = h - 25 - valor * 2;
+
+    if(i === 0){
+      ctx.moveTo(x, y);
+    }else{
+      ctx.lineTo(x, y);
     }
+  });
 
-    function toggleSalida() {
-      bombaSalida = !bombaSalida;
+  ctx.stroke();
 
-      if (bombaSalida) {
-        bombaEntrada = false;
-        alerta("Bomba de salida encendida.");
-      } else {
-        alerta("Bomba de salida apagada.");
-      }
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("Nivel %", 45, 18);
+}
 
-      actualizarPantalla();
-    }
-
-    setInterval(function() {
-      if (automatico) {
-        if (nivel <= 30) {
-          bombaEntrada = true;
-          bombaSalida = false;
-          alertaUnaVez("Nivel bajo detectado. Iniciando llenado.", "bajo");
-        }
-
-        if (nivel >= 85) {
-          bombaEntrada = false;
-          bombaSalida = false;
-          alertaUnaVez("Llenado completado. Nivel óptimo alcanzado.", "lleno");
-        }
-
-        if (!bombaEntrada && nivel > 35) {
-          nivel -= 0.8;
-        }
-      }
-
-      if (bombaEntrada) nivel += 2.5;
-      if (bombaSalida) nivel -= 2.3;
-
-      if (nivel >= 100) {
-        nivel = 100;
-        bombaEntrada = false;
-        alertaUnaVez("Nivel máximo alcanzado.", "maximo");
-      }
-
-      if (nivel <= 0) {
-        nivel = 0;
-        bombaSalida = false;
-        alertaUnaVez("Tanque vacío.", "vacio");
-      }
-
-      if (nivel > 35 && nivel < 80) {
-        ultimaAlerta = "";
-      }
-
-      actualizarPantalla();
-    }, 350);
-
-    function actualizarPantalla() {
-      const nivelRedondeado = Math.round(nivel);
-      const litros = nivelRedondeado * 100;
-
-      document.getElementById("water").style.height = nivelRedondeado + "%";
-      document.getElementById("levelText").textContent = nivelRedondeado + "%";
-      document.getElementById("percent").textContent = nivelRedondeado + "%";
-      document.getElementById("liters").textContent = litros + " L";
-
-      const water = document.getElementById("water");
-      const state = document.getElementById("tankState");
-
-      state.className = "";
-
-      if (nivelRedondeado <= 20 || nivelRedondeado >= 95) {
-        water.style.background = "#ef4444";
-        state.textContent = "CRÍTICO";
-        state.classList.add("red");
-      } else if (nivelRedondeado <= 35 || nivelRedondeado >= 85) {
-        water.style.background = "#facc15";
-        state.textContent = "PRECAUCIÓN";
-        state.classList.add("yellow");
-      } else {
-        water.style.background = "#22c55e";
-        state.textContent = "NORMAL";
-        state.classList.add("green");
-      }
-
-      document.getElementById("inValve").textContent = bombaEntrada ? "Abierta" : "Cerrada";
-      document.getElementById("outValve").textContent = bombaSalida ? "Abierta" : "Cerrada";
-
-      const btnEntrada = document.getElementById("btnEntrada");
-      const btnSalida = document.getElementById("btnSalida");
-
-      btnEntrada.textContent = bombaEntrada ? "Bomba Entrada: ON" : "Bomba Entrada: OFF";
-      btnSalida.textContent = bombaSalida ? "Bomba Salida: ON" : "Bomba Salida: OFF";
-
-      btnEntrada.classList.toggle("active", bombaEntrada);
-      btnSalida.classList.toggle("active", bombaSalida);
-    }
-
-    function alerta(texto) {
-      const caja = document.getElementById("alerts");
-      const item = document.createElement("div");
-      const hora = new Date().toLocaleTimeString();
-
-      item.className = "alert";
-      item.innerHTML = texto + "<br><small>" + hora + "</small>";
-
-      caja.prepend(item);
-
-      if (caja.children.length > 6) {
-        caja.removeChild(caja.lastChild);
-      }
-    }
-
-    function alertaUnaVez(texto, codigo) {
-      if (ultimaAlerta !== codigo) {
-        alerta(texto);
-        ultimaAlerta = codigo;
-      }
-    }
-
-    actualizarPantalla();
-  </script>
+setInterval(simular, 1000);
+simular();
+</script>
 
 </body>
 </html>
