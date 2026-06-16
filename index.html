@@ -1,290 +1,173 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HMI SCADA Tanque</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HMI/SCADA Industrial PRO - Tanque de Agua</title>
 <style>
+:root{
+  --bg:#06101b;
+  --bg2:#0b1624;
+  --panel:#111d2d;
+  --panel2:#17283d;
+  --card:#1b2f47;
+  --line:#31475f;
+  --text:#f8fafc;
+  --muted:#9fb0c3;
+  --green:#22c55e;
+  --yellow:#facc15;
+  --red:#ef4444;
+  --cyan:#38bdf8;
+  --blue:#2563eb;
+  --orange:#f97316;
+  --purple:#a855f7;
+  --shadow:0 18px 50px rgba(0,0,0,.34);
+}
+body.light{
+  --bg:#eaf2fb;
+  --bg2:#f8fafc;
+  --panel:#ffffff;
+  --panel2:#eef6ff;
+  --card:#ffffff;
+  --line:#c7d7ea;
+  --text:#0f172a;
+  --muted:#526274;
+  --shadow:0 16px 35px rgba(15,23,42,.13);
+}
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial;background:#07111d;color:white}
-.top{padding:16px;text-align:center;color:#38bdf8;font-weight:800;background:#0b1726}
-.box{max-width:1100px;margin:auto;padding:18px}
-.card{background:#132235;border:1px solid #2d4058;border-radius:16px;padding:18px;margin-bottom:16px}
-input,button{width:100%;padding:12px;border-radius:10px;margin:7px 0}
-input{background:#08131f;color:white;border:1px solid #38506b}
-button{border:0;font-weight:800;color:white;cursor:pointer}
-.ok{background:#22c55e}.bad{background:#ef4444}.blue{background:#334155}
-.login{min-height:85vh;display:grid;place-items:center}
-.login .card{width:min(390px,92%)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.kpi{background:#1b2b40;border-radius:12px;padding:14px}
-.kpi b{font-size:25px}
-.muted{color:#a9b6c6}
-.tank{width:140px;height:250px;border:5px solid #8fa3bd;border-radius:28px 28px 16px 16px;overflow:hidden;background:#06101a;position:relative;margin:auto}
-.water{position:absolute;bottom:0;width:100%;height:50%;background:#22c55e;transition:.4s}
-.pct{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;font-weight:900;text-shadow:0 2px 8px black}
-.row{display:flex;gap:10px}
-.row button{flex:1}
-.log{background:#08131f;border-radius:12px;padding:12px;min-height:110px}
-.alarm{color:#fecaca}.warn{color:#fde68a}.normal{color:#86efac}
-canvas{width:100%;height:250px;background:#08131f;border-radius:12px}
-@media(max-width:760px){.grid,.kpis{grid-template-columns:1fr}.row{display:block}}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--text);
+  background:radial-gradient(circle at top left,#143452 0%,var(--bg) 45%,#03070d 100%);
+}
+body.light{background:linear-gradient(135deg,#eaf2fb,#f8fafc)}
+button,input,select{font-family:inherit}.hidden{display:none!important}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{
+  width:min(470px,100%);background:linear-gradient(180deg,rgba(20,38,58,.97),rgba(13,24,38,.98));
+  border:1px solid var(--line);border-radius:26px;padding:30px;box-shadow:var(--shadow);position:relative;overflow:hidden
+}
+.login-card:before{content:"";position:absolute;inset:-70px auto auto -70px;width:180px;height:180px;border-radius:50%;background:rgba(56,189,248,.17);filter:blur(2px)}
+.login-card h1{margin:0;color:var(--cyan);font-size:30px}.login-card p{color:#cbd5e1;line-height:1.45}.login-card .logo{font-size:42px;margin-bottom:10px}
+.field{margin:14px 0}.field label{display:block;font-size:13px;font-weight:900;margin-bottom:7px;color:#dbeafe}.field input{width:100%;padding:13px 14px;border-radius:14px;border:1px solid #3b536c;background:#07111d;color:white;outline:none}.field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(56,189,248,.16)}
+.error{color:#fecaca;min-height:22px;margin-top:10px;font-size:13px;font-weight:800}.login-help{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.23);border-radius:14px;padding:12px;margin-top:14px;font-size:13px;color:#dceeff}
+.btn{border:0;border-radius:13px;padding:12px 14px;color:white;font-weight:900;cursor:pointer;transition:.18s;letter-spacing:.2px}.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}.btn-green{background:linear-gradient(90deg,#16a34a,#22c55e)}.btn-red{background:linear-gradient(90deg,#dc2626,#ef4444)}.btn-blue{background:linear-gradient(90deg,#2563eb,#38bdf8)}.btn-dark{background:#334155}.btn-yellow{background:linear-gradient(90deg,#ca8a04,#facc15);color:#1f2937}.btn-purple{background:linear-gradient(90deg,#7c3aed,#a855f7)}.btn-outline{background:transparent;border:1px solid var(--line);color:var(--text)}.login-btn{width:100%;margin-top:8px}
+.app{min-height:100vh;display:grid;grid-template-columns:280px 1fr}.sidebar{background:rgba(7,17,29,.94);border-right:1px solid #22364d;padding:18px;position:sticky;top:0;height:100vh;overflow:auto}body.light .sidebar{background:#f8fafc}.brand{background:linear-gradient(180deg,#101d2c,#0b1726);border:1px solid #2c4058;border-radius:18px;padding:15px;margin-bottom:18px;box-shadow:var(--shadow)}body.light .brand{background:#fff}.brand h2{margin:0;color:var(--cyan);font-size:19px}.brand small{display:block;color:var(--muted);margin-top:6px;line-height:1.4}.brand .tag{display:inline-block;margin-top:10px;padding:5px 8px;border-radius:999px;background:rgba(34,197,94,.13);color:#bbf7d0;font-size:11px;font-weight:900}body.light .brand .tag{color:#15803d}
+.nav-btn{width:100%;text-align:left;padding:12px;margin:6px 0;border-radius:13px;border:1px solid transparent;background:transparent;color:#dbeafe;font-weight:900;cursor:pointer;display:flex;gap:10px;align-items:center}body.light .nav-btn{color:#1e293b}.nav-btn:hover{background:#132235;border-color:#31475f}body.light .nav-btn:hover{background:#e8f2fc}.nav-btn.active{background:#12344f;border-color:var(--cyan);color:white}body.light .nav-btn.active{color:#0f172a;background:#dff3ff}.side-footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.45}
+.content{padding:20px;max-width:1500px;width:100%;margin:0 auto}.header{background:linear-gradient(90deg,rgba(17,29,45,.98),rgba(23,40,61,.98));border:1px solid #2c4058;border-radius:20px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:18px;box-shadow:var(--shadow)}body.light .header{background:#fff}.header h1{margin:0;font-size:25px}.header p{margin:6px 0 0;color:var(--muted)}.header-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}.clock{background:var(--bg2);border:1px solid var(--line);padding:10px 12px;border-radius:13px;font-weight:900}.status-pill{border-radius:999px;padding:9px 13px;font-size:12px;font-weight:1000;border:1px solid}.status-normal{color:#bbf7d0;background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.5)}body.light .status-normal{color:#166534}.status-warning{color:#fef08a;background:rgba(250,204,21,.15);border-color:rgba(250,204,21,.5)}body.light .status-warning{color:#854d0e}.status-alarm{color:#fecaca;background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.55)}body.light .status-alarm{color:#991b1b}.status-trip{color:#e9d5ff;background:rgba(168,85,247,.17);border-color:rgba(168,85,247,.55)}body.light .status-trip{color:#6b21a8}
+.view{display:none}.view.active{display:block}.grid{display:grid;gap:16px}.grid-2{grid-template-columns:1.15fr .85fr}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}.grid-5{grid-template-columns:repeat(5,1fr)}.card{background:rgba(17,29,45,.96);border:1px solid #2c4058;border-radius:20px;padding:18px;box-shadow:var(--shadow)}body.light .card{background:#fff}.card h3{margin:0 0 14px}.muted{color:var(--muted);font-size:13px;line-height:1.45}.kpi{background:linear-gradient(180deg,#1b2f47,#142337);border:1px solid #31475f;border-radius:18px;padding:16px;min-height:125px;position:relative;overflow:hidden}body.light .kpi{background:#fff}.kpi:after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:rgba(56,189,248,.08)}.kpi span{display:block;color:var(--muted);font-size:13px;font-weight:900;margin-bottom:8px}.kpi strong{font-size:28px}.kpi small{color:#cbd5e1;font-weight:700}body.light .kpi small{color:#64748b}.bar-bg{height:9px;background:var(--bg2);border-radius:999px;margin-top:14px;overflow:hidden}.bar{height:100%;width:50%;background:var(--green);border-radius:999px;transition:.3s}
+.process-area{display:grid;grid-template-columns:310px 1fr;gap:18px;align-items:center}.tank-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}.tank{width:185px;height:345px;border:7px solid #91a7c0;border-radius:38px 38px 18px 18px;background:#06101a;overflow:hidden;position:relative;box-shadow:inset 0 0 30px rgba(255,255,255,.08),0 0 0 9px rgba(56,189,248,.05)}.water{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(180deg,#30e978,#16a34a);transition:.45s height,.3s background}.water:before{content:"";position:absolute;top:-11px;left:-20%;width:140%;height:24px;background:rgba(255,255,255,.27);border-radius:50%;animation:wave 2.5s infinite linear}@keyframes wave{0%{transform:translateX(0)}50%{transform:translateX(14px)}100%{transform:translateX(0)}}.tank-percent{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;z-index:2;font-size:36px;font-weight:1000;text-shadow:0 3px 14px black}.tank-scale{position:absolute;right:8px;top:18px;bottom:18px;width:22px;display:flex;flex-direction:column;justify-content:space-between;color:#dbeafe;font-size:10px;font-weight:900;z-index:3;text-shadow:0 1px 4px black}.pipe-box{display:grid;gap:10px}.pipe-item{background:var(--panel2);border-left:5px solid var(--cyan);padding:12px;border-radius:13px}.pipe-item span{color:var(--green);font-weight:1000}.mini-layout{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mini-card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px}.mini-card b{display:block;margin-top:4px}
+.control-group{display:grid;gap:10px}.control-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.setpoint{background:var(--bg2);border:1px solid var(--line);padding:12px;border-radius:14px}.setpoint label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:900}.setpoint input,.setpoint select{width:100%;padding:10px;border-radius:11px;border:1px solid #3b536c;background:var(--panel);color:var(--text)}body.light .setpoint input,body.light .setpoint select{background:#fff}.log{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:10px;max-height:360px;overflow:auto}.log-item{padding:10px;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}.log-item:last-child{border-bottom:0}.log-time{display:block;color:#8fa6bd;font-size:11px;margin-bottom:3px}.log-ok{border-left:4px solid var(--green);background:rgba(34,197,94,.08)}.log-warning{border-left:4px solid var(--yellow);background:rgba(250,204,21,.08)}.log-alarm{border-left:4px solid var(--red);background:rgba(239,68,68,.08)}.log-trip{border-left:4px solid var(--purple);background:rgba(168,85,247,.10)}
+.alarm-card{background:var(--panel2);border:1px solid #31475f;border-radius:16px;padding:14px}.alarm-card h4{margin:0 0 8px}.alarm-card p{margin:0;color:var(--muted);font-size:13px}.alarm-normal{border-color:rgba(34,197,94,.5)}.alarm-warning{border-color:rgba(250,204,21,.6)}.alarm-danger{border-color:rgba(239,68,68,.65)}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:1000;margin-bottom:8px}.badge-green{background:rgba(34,197,94,.16);color:#bbf7d0}.badge-yellow{background:rgba(250,204,21,.16);color:#fef08a}.badge-red{background:rgba(239,68,68,.16);color:#fecaca}.badge-blue{background:rgba(56,189,248,.16);color:#bae6fd}.badge-purple{background:rgba(168,85,247,.16);color:#e9d5ff}body.light .badge-green{color:#166534}body.light .badge-yellow{color:#854d0e}body.light .badge-red{color:#991b1b}body.light .badge-blue{color:#075985}body.light .badge-purple{color:#6b21a8}
+.chart-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}select{padding:11px;border-radius:12px;background:var(--bg2);color:var(--text);border:1px solid #3b536c}canvas{width:100%;height:350px;display:block;background:var(--bg2);border:1px solid var(--line);border-radius:16px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border-bottom:1px solid #31475f;text-align:left}th{background:rgba(20,35,55,.86);color:#dbeafe}body.light th{background:#edf6ff;color:#0f172a}.report-box{background:var(--panel2);border:1px solid #31475f;border-radius:16px;padding:15px;line-height:1.55}.report-box h4{margin:0 0 8px}.footer{text-align:center;color:#8296aa;margin-top:18px;font-size:12px}.led{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);margin-right:6px}.led.off{background:#64748b;box-shadow:none}.led.warn{background:var(--yellow);box-shadow:0 0 12px var(--yellow)}.led.alarm{background:var(--red);box-shadow:0 0 12px var(--red)}
+@media(max-width:1100px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid #22364d}.grid-2,.grid-3,.grid-4,.grid-5,.process-area{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start}.header-actions{justify-content:flex-start}}
+@media(max-width:560px){.content{padding:12px}.control-row,.mini-layout{grid-template-columns:1fr}.tank{width:150px;height:285px}.header h1{font-size:20px}}
 </style>
 </head>
-
 <body>
-<div class="top">Proyecto de Nilton Castro - 228660</div>
-
-<section id="login" class="login">
-  <div class="card">
-    <h2>Ingreso HMI/SCADA</h2>
-    <p class="muted">Usuario: <b>admin</b> | Contraseña: <b>admin123</b></p>
-
-    <input id="usuario" placeholder="Usuario">
-    <input id="clave" type="password" placeholder="Contraseña">
-
-    <button class="ok" onclick="entrar()">ENTRAR</button>
-    <p id="mensaje" class="alarm"></p>
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="logo">⚙️</div>
+    <h1>Acceso HMI/SCADA PRO</h1>
+    <p>Panel industrial para monitoreo y control simulado de un tanque de agua.</p>
+    <div class="field"><label>Usuario</label><input id="loginUser" type="text" placeholder="admin" autocomplete="username"></div>
+    <div class="field"><label>Contraseña</label><input id="loginPass" type="password" placeholder="admin123" autocomplete="current-password"></div>
+    <button id="loginBtn" class="btn btn-green login-btn" type="button">INGRESAR AL SISTEMA</button>
+    <button id="fillLoginBtn" class="btn btn-outline login-btn" type="button">Autocompletar credenciales</button>
+    <div id="loginError" class="error"></div>
+    <div class="login-help">Usuario: <b>admin</b> &nbsp; | &nbsp; Contraseña: <b>admin123</b></div>
   </div>
 </section>
-
-<main id="app" class="box" style="display:none">
-
-  <div class="card">
-    <h2>HMI/SCADA - Tanque de Agua</h2>
-    <p class="muted">Fecha y hora: <span id="hora"></span></p>
-    <button class="bad" onclick="salir()">Cerrar sesión</button>
-  </div>
-
-  <div class="kpis">
-    <div class="kpi"><span class="muted">Nivel</span><br><b id="nivelTxt">50%</b></div>
-    <div class="kpi"><span class="muted">Temperatura</span><br><b id="tempTxt">38°C</b></div>
-    <div class="kpi"><span class="muted">Caudal</span><br><b id="caudalTxt">0 L/min</b></div>
-    <div class="kpi"><span class="muted">Presión</span><br><b id="presionTxt">2.1 bar</b></div>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <h3>Visualización del tanque</h3>
-
-      <div class="tank">
-        <div id="agua" class="water"></div>
-        <div id="porcentaje" class="pct">50%</div>
+<section id="mainApp" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand"><h2>HMI/SCADA Industrial</h2><small>Tanque TK-101 · Bomba P-101 · Simulación local</small><span class="tag">PROTOTIPO FUNCIONAL</span></div>
+    <button class="nav-btn active" data-view="dashboardView">📊 Dashboard general</button>
+    <button class="nav-btn" data-view="processView">🏭 Proceso industrial</button>
+    <button class="nav-btn" data-view="controlView">🎛️ Control y operación</button>
+    <button class="nav-btn" data-view="trendsView">📈 Tendencias</button>
+    <button class="nav-btn" data-view="alarmsView">🚨 Alarmas e historial</button>
+    <button class="nav-btn" data-view="maintenanceView">🛠️ Mantenimiento</button>
+    <button class="nav-btn" data-view="reportView">📄 Reporte</button>
+    <div class="side-footer">Credenciales activas: admin/admin123<br>Diseño HMI web para GitHub Pages.</div>
+  </aside>
+  <main class="content">
+    <header class="header">
+      <div><h1>Panel de Control de Tanque</h1><p>Ciclo automático: descarga hasta mínimo, llenado hasta máximo, alarmas y tendencias en tiempo real.</p></div>
+      <div class="header-actions"><div id="clock" class="clock">--/--/---- --:--:--</div><div id="generalStatus" class="status-pill status-normal">NORMAL</div><button id="themeBtn" class="btn btn-outline">Tema</button><button id="logoutBtn" class="btn btn-red">Cerrar sesión</button></div>
+    </header>
+    <section id="dashboardView" class="view active">
+      <div class="grid grid-5">
+        <div class="kpi"><span>Nivel</span><strong id="levelText">55%</strong><small>Mínimo: <b id="lowSpText">20%</b></small><div class="bar-bg"><div id="levelBar" class="bar"></div></div></div>
+        <div class="kpi"><span>Temperatura</span><strong id="tempText">38.0 °C</strong><small>Límite: <b id="tempSpText">60 °C</b></small><div class="bar-bg"><div id="tempBar" class="bar"></div></div></div>
+        <div class="kpi"><span>Caudal</span><strong id="flowText">0.0 L/min</strong><small>Entrada/salida</small><div class="bar-bg"><div id="flowBar" class="bar"></div></div></div>
+        <div class="kpi"><span>Presión</span><strong id="pressureText">2.1 bar</strong><small>Límite: 3.2 bar</small><div class="bar-bg"><div id="pressureBar" class="bar"></div></div></div>
+        <div class="kpi"><span>Energía bomba</span><strong id="energyText">0.00 kWh</strong><small>Consumo simulado</small><div class="bar-bg"><div id="energyBar" class="bar"></div></div></div>
       </div>
-
-      <h3 id="estado" class="normal">Estado: NORMAL</h3>
-
-      <p>Bomba entrada: <b id="bombaEntradaTxt">OFF</b></p>
-      <p>Válvula entrada: <b id="entradaTxt">CERRADA</b></p>
-      <p>Válvula salida: <b id="salidaTxt">ABIERTA</b></p>
-      <p>Modo: <b>AUTOMÁTICO</b></p>
-    </div>
-
-    <div class="card">
-      <h3>Panel de control</h3>
-
-      <div class="row">
-        <button class="ok" onclick="iniciar()">INICIAR</button>
-        <button class="bad" onclick="detener()">DETENER</button>
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card"><h3>Vista del proceso</h3><div class="process-area"><div class="tank-wrap"><div class="tank"><div class="tank-scale"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div><div id="water" class="water"></div><div id="tankPercent" class="tank-percent">55%</div></div><div id="tankStatus" class="status-pill status-normal">NORMAL</div></div><div class="pipe-box"><div class="pipe-item">Sistema: <span id="systemText">DETENIDO</span></div><div class="pipe-item">Modo: <span id="modeText">AUTOMÁTICO</span></div><div class="pipe-item">Ciclo: <span id="cycleText">ESPERA</span></div><div class="pipe-item">Bomba P-101: <span id="pumpInText">OFF</span></div><div class="pipe-item">Válvula entrada: <span id="valveInText">CERRADA</span></div><div class="pipe-item">Válvula salida: <span id="valveOutText">ABIERTA</span></div><div class="pipe-item">Operador: <span id="operatorText">admin</span></div></div></div></div>
+        <div class="card"><h3>Indicadores operativos</h3><div class="mini-layout"><div class="mini-card">Ciclos completados <b id="cycleCounterText">0</b></div><div class="mini-card">Tiempo activo <b id="runtimeText">00:00:00</b></div><div class="mini-card">Caudal acumulado <b id="volumeText">0 L</b></div><div class="mini-card">Rendimiento <b id="performanceText">Normal</b></div></div><h3 style="margin-top:16px">Eventos recientes</h3><div id="eventLog" class="log"></div></div>
       </div>
-
-      <p class="muted">
-        Funcionamiento: el tanque se vacía solo. Al llegar a 20%, la bomba se activa y llena hasta 85%.
-      </p>
-
-      <h3>Alarmas</h3>
-      <div id="alarmas" class="log"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>Tendencia: nivel del tanque vs. tiempo</h3>
-    <canvas id="grafico" width="900" height="250"></canvas>
-  </div>
-
-</main>
-
+    </section>
+    <section id="processView" class="view">
+      <div class="card"><h3>Diagrama sinóptico del proceso</h3><p class="muted">El tanque se descarga automáticamente por consumo simulado. Al llegar al nivel mínimo, se activa la bomba de entrada. Cuando llega al nivel máximo, la bomba se apaga y el tanque vuelve a descargarse.</p><div class="grid grid-3" style="margin-top:16px;"><div class="alarm-card alarm-normal"><span class="badge badge-green">ENTRADA</span><h4>Bomba P-101</h4><p>Llena el tanque cuando el nivel llega al mínimo configurado.</p></div><div class="alarm-card alarm-warning"><span class="badge badge-yellow">PROCESO</span><h4>Tanque TK-101</h4><p>Variables: nivel, temperatura, caudal, presión y consumo eléctrico.</p></div><div class="alarm-card alarm-normal"><span class="badge badge-green">SALIDA</span><h4>Descarga simulada</h4><p>Representa el consumo industrial que hace bajar el nivel.</p></div></div></div>
+      <div class="grid grid-2"><div class="card"><h3>Estados de equipos</h3><div class="table-wrap"><table><thead><tr><th>Equipo</th><th>Tag</th><th>Estado</th><th>Función</th></tr></thead><tbody><tr><td>Bomba de entrada</td><td>P-101</td><td id="tablePump">OFF</td><td>Llenado automático</td></tr><tr><td>Válvula entrada</td><td>XV-101</td><td id="tableValveIn">CERRADA</td><td>Ingreso de agua</td></tr><tr><td>Válvula salida</td><td>XV-102</td><td id="tableValveOut">ABIERTA</td><td>Descarga del tanque</td></tr><tr><td>Sensor de nivel</td><td>LT-101</td><td>ACTIVO</td><td>Medición continua</td></tr><tr><td>Transmisor presión</td><td>PT-101</td><td>ACTIVO</td><td>Supervisión de presión</td></tr></tbody></table></div></div><div class="card"><h3>Secuencia automática</h3><div class="log"><div class="log-item log-ok"><span class="log-time">Paso 1</span>El tanque baja por descarga simulada.</div><div class="log-item log-warning"><span class="log-time">Paso 2</span>Cuando llega al mínimo, inicia llenado automático.</div><div class="log-item log-ok"><span class="log-time">Paso 3</span>La bomba llena el tanque.</div><div class="log-item log-ok"><span class="log-time">Paso 4</span>Al llegar al máximo, se apaga la bomba y vuelve a descargar.</div><div class="log-item log-trip"><span class="log-time">Protección</span>Parada de emergencia bloquea el sistema hasta reinicio.</div></div></div></div>
+    </section>
+    <section id="controlView" class="view">
+      <div class="grid grid-2"><div class="card"><h3>Control de operación</h3><div class="control-group"><div class="control-row"><button id="startBtn" class="btn btn-green">INICIAR SISTEMA</button><button id="stopBtn" class="btn btn-red">DETENER SISTEMA</button></div><button id="modeBtn" class="btn btn-blue">CAMBIAR A MODO MANUAL</button><div class="control-row"><button id="manualFillBtn" class="btn btn-dark" disabled>LLENADO MANUAL</button><button id="manualDrainBtn" class="btn btn-dark" disabled>DESCARGA MANUAL</button></div><div class="control-row"><button id="emergencyBtn" class="btn btn-red">PARADA DE EMERGENCIA</button><button id="resetTripBtn" class="btn btn-purple">REINICIAR BLOQUEO</button></div><button id="ackBtn" class="btn btn-yellow">RECONOCER ALARMAS</button></div><p class="muted">En automático, el tanque se vacía solo y se llena al llegar al mínimo. En manual, el operador puede forzar llenado o descarga.</p></div>
+      <div class="card"><h3>Setpoints y simulación</h3><div class="grid grid-2"><div class="setpoint"><label>Nivel mínimo para iniciar llenado (%)</label><input id="lowSetpoint" type="number" value="20" min="5" max="40"></div><div class="setpoint"><label>Nivel máximo para detener llenado (%)</label><input id="highSetpoint" type="number" value="85" min="60" max="95"></div><div class="setpoint"><label>Alarma de nivel alto (%)</label><input id="highAlarmSetpoint" type="number" value="90" min="70" max="100"></div><div class="setpoint"><label>Alarma de temperatura alta (°C)</label><input id="tempAlarmSetpoint" type="number" value="60" min="40" max="90"></div><div class="setpoint"><label>Velocidad de simulación</label><select id="speedSelect"><option value="0.6">Lenta</option><option value="1" selected>Normal</option><option value="1.8">Rápida</option><option value="3">Demostración</option></select></div><div class="setpoint"><label>Prueba de falla</label><select id="faultSelect"><option value="none">Sin falla</option><option value="flow">Falla de caudal</option><option value="temp">Temperatura alta</option><option value="pressure">Sobrepresión</option></select></div></div><button id="saveSpBtn" class="btn btn-green" style="margin-top:12px;width:100%;">GUARDAR CONFIGURACIÓN</button></div></div>
+    </section>
+    <section id="trendsView" class="view">
+      <div class="card"><div class="chart-toolbar"><div><h3>Tendencias históricas</h3><p class="muted">Gráfica en tiempo real de las variables del proceso.</p></div><select id="chartVariable"><option value="level">Nivel del tanque (%)</option><option value="temperature">Temperatura (°C)</option><option value="flow">Caudal (L/min)</option><option value="pressure">Presión (bar)</option><option value="energy">Energía bomba (kWh)</option></select></div><canvas id="trendCanvas" width="1200" height="350"></canvas></div><div class="grid grid-4"><div class="kpi"><span>Muestras</span><strong id="sampleText">0</strong><small>Máximo visual: 100</small></div><div class="kpi"><span>Nivel mínimo</span><strong id="minLevelText">--%</strong><small>Historial actual</small></div><div class="kpi"><span>Nivel máximo</span><strong id="maxLevelText">--%</strong><small>Historial actual</small></div><div class="kpi"><span>Estado tendencia</span><strong id="trendStateText">--</strong><small>Ciclo actual</small></div></div>
+    </section>
+    <section id="alarmsView" class="view"><div class="grid grid-2"><div class="card"><h3>Alarmas activas</h3><div id="alarmCards" class="grid grid-2"></div></div><div class="card"><h3>Historial de alarmas</h3><div id="alarmLog" class="log"></div></div></div></section>
+    <section id="maintenanceView" class="view"><div class="grid grid-3"><div class="alarm-card alarm-normal"><span class="badge badge-green">OK</span><h4>Sensor LT-101</h4><p>Medición estable. Revisión recomendada cada 30 días.</p></div><div class="alarm-card alarm-normal"><span class="badge badge-green">OK</span><h4>Bomba P-101</h4><p>Arranque automático operativo. Revisar vibración y corriente.</p></div><div class="alarm-card alarm-warning"><span class="badge badge-yellow">PREVENTIVO</span><h4>Válvula XV-102</h4><p>Programar inspección para evitar obstrucción en descarga.</p></div></div><div class="card"><h3>Checklist y exportación</h3><div class="table-wrap"><table><thead><tr><th>Actividad</th><th>Frecuencia</th><th>Responsable</th><th>Estado</th></tr></thead><tbody><tr><td>Verificar sensor de nivel</td><td>Semanal</td><td>Operador</td><td>Programado</td></tr><tr><td>Inspeccionar bomba de entrada</td><td>Mensual</td><td>Mantenimiento</td><td>Pendiente</td></tr><tr><td>Probar alarmas</td><td>Quincenal</td><td>Supervisor</td><td>Programado</td></tr><tr><td>Respaldar historial</td><td>Diario</td><td>Operador</td><td>Disponible</td></tr></tbody></table></div><div class="control-row" style="margin-top:12px;"><button id="downloadCsvBtn" class="btn btn-blue">EXPORTAR HISTORIAL CSV</button><button id="resetHistoryBtn" class="btn btn-dark">LIMPIAR HISTORIAL</button></div></div></section>
+    <section id="reportView" class="view"><div class="grid grid-2"><div class="report-box"><h4>Software utilizado</h4><p>HTML, CSS y JavaScript en un solo archivo index.html. Puede ejecutarse localmente o en GitHub Pages.</p></div><div class="report-box"><h4>Proceso simulado</h4><p>Sistema HMI/SCADA para tanque de agua con descarga automática y llenado automático por bajo nivel.</p></div><div class="report-box"><h4>Variables principales</h4><p>Nivel, temperatura, caudal, presión, energía, volumen acumulado, bomba, válvulas y ciclo de operación.</p></div><div class="report-box"><h4>Alarmas</h4><p>Nivel alto, nivel bajo, temperatura alta, sobrepresión, sistema detenido, falla de caudal y parada de emergencia.</p></div><div class="report-box"><h4>Controles</h4><p>Inicio, parada, modo automático/manual, llenado manual, descarga manual, emergencia, reconocimiento de alarmas, setpoints, velocidad y fallas de prueba.</p></div><div class="report-box"><h4>Conclusión</h4><p>El prototipo muestra una interfaz industrial completa con monitoreo, control, alarmas, tendencias, historial, mantenimiento y reporte.</p></div></div><div class="footer">Escuela Profesional de Ingeniería Electrónica - Curso: Autómatas Programables</div></section>
+  </main>
+</section>
 <script>
-let nivel = 50;
-let temperatura = 38;
-let caudal = 8;
-let presion = 2.1;
-
-let sistemaActivo = false;
-let llenando = false;
-
-let historial = [];
-
-function entrar(){
-  let user = document.getElementById("usuario").value.trim().toLowerCase();
-  let pass = document.getElementById("clave").value.trim();
-
-  if(user === "admin" && pass === "admin123"){
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    document.getElementById("mensaje").textContent = "";
-  }else{
-    document.getElementById("mensaje").textContent = "Usuario o contraseña incorrectos";
-  }
-}
-
-function salir(){
-  document.getElementById("app").style.display = "none";
-  document.getElementById("login").style.display = "grid";
-  document.getElementById("clave").value = "";
-}
-
-function iniciar(){
-  sistemaActivo = true;
-}
-
-function detener(){
-  sistemaActivo = false;
-  llenando = false;
-  caudal = 0;
-}
-
-function simular(){
-  document.getElementById("hora").textContent = new Date().toLocaleString();
-
-  if(sistemaActivo){
-
-    if(nivel <= 20){
-      llenando = true;
-    }
-
-    if(nivel >= 85){
-      llenando = false;
-    }
-
-    if(llenando){
-      nivel += 1.8;
-      caudal = 12 + Math.random() * 4;
-    }else{
-      nivel -= 0.9;
-      caudal = 6 + Math.random() * 3;
-    }
-
-    temperatura += Math.random() * 0.4 - 0.15;
-
-  }else{
-    caudal = 0;
-  }
-
-  nivel = Math.max(0, Math.min(100, nivel));
-  temperatura = Math.max(25, Math.min(70, temperatura));
-  presion = 0.8 + nivel / 40 + (llenando ? 0.3 : 0);
-
-  historial.push(nivel);
-  if(historial.length > 35) historial.shift();
-
-  pintar();
-}
-
-function pintar(){
-  document.getElementById("nivelTxt").textContent = nivel.toFixed(0) + "%";
-  document.getElementById("tempTxt").textContent = temperatura.toFixed(1) + "°C";
-  document.getElementById("caudalTxt").textContent = caudal.toFixed(1) + " L/min";
-  document.getElementById("presionTxt").textContent = presion.toFixed(1) + " bar";
-
-  document.getElementById("agua").style.height = nivel + "%";
-  document.getElementById("porcentaje").textContent = nivel.toFixed(0) + "%";
-
-  document.getElementById("bombaEntradaTxt").textContent = llenando ? "ON" : "OFF";
-  document.getElementById("entradaTxt").textContent = llenando ? "ABIERTA" : "CERRADA";
-  document.getElementById("salidaTxt").textContent = llenando ? "CERRADA" : "ABIERTA";
-
-  let listaAlarmas = [];
-
-  if(!sistemaActivo){
-    listaAlarmas.push("<p class='warn'>Sistema detenido</p>");
-  }
-
-  if(nivel > 90){
-    listaAlarmas.push("<p class='alarm'>Alarma: nivel alto mayor a 90%</p>");
-  }
-
-  if(nivel < 20){
-    listaAlarmas.push("<p class='warn'>Advertencia: nivel bajo, inicia llenado automático</p>");
-  }
-
-  if(temperatura > 60){
-    listaAlarmas.push("<p class='alarm'>Alarma: temperatura mayor a 60°C</p>");
-  }
-
-  if(sistemaActivo && llenando && caudal < 1){
-    listaAlarmas.push("<p class='alarm'>Falla: bomba activa sin caudal</p>");
-  }
-
-  if(listaAlarmas.length === 0){
-    listaAlarmas.push("<p class='normal'>Sistema normal: ciclo automático funcionando</p>");
-  }
-
-  document.getElementById("alarmas").innerHTML = listaAlarmas.join("");
-
-  let estado = document.getElementById("estado");
-
-  if(nivel > 90 || temperatura > 60){
-    estado.textContent = "Estado: ALARMA";
-    estado.className = "alarm";
-    document.getElementById("agua").style.background = "#ef4444";
-  }else if(nivel < 25){
-    estado.textContent = "Estado: ADVERTENCIA";
-    estado.className = "warn";
-    document.getElementById("agua").style.background = "#facc15";
-  }else{
-    estado.textContent = "Estado: NORMAL";
-    estado.className = "normal";
-    document.getElementById("agua").style.background = "#22c55e";
-  }
-
-  graficar();
-}
-
-function graficar(){
-  let canvas = document.getElementById("grafico");
-  let ctx = canvas.getContext("2d");
-  let w = canvas.width;
-  let h = canvas.height;
-
-  ctx.clearRect(0,0,w,h);
-
-  ctx.strokeStyle = "#334155";
-  ctx.lineWidth = 1;
-
-  for(let i = 0; i < 5; i++){
-    ctx.beginPath();
-    ctx.moveTo(40, 20 + i * 45);
-    ctx.lineTo(w - 20, 20 + i * 45);
-    ctx.stroke();
-  }
-
-  ctx.strokeStyle = "#38bdf8";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-
-  historial.forEach((valor, i) => {
-    let x = 40 + i * ((w - 70) / 34);
-    let y = h - 25 - valor * 2;
-
-    if(i === 0){
-      ctx.moveTo(x, y);
-    }else{
-      ctx.lineTo(x, y);
-    }
-  });
-
-  ctx.stroke();
-
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("Nivel %", 45, 18);
-}
-
-setInterval(simular, 1000);
-simular();
+(function(){
+function $(id){return document.getElementById(id)}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function random(min,max){return Math.random()*(max-min)+min}
+function nowTime(){return new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}
+function nowDateTime(){return new Date().toLocaleString("es-PE")}
+function fmtHMS(sec){var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=Math.floor(sec%60);return [h,m,s].map(function(n){return String(n).padStart(2,"0")}).join(":")}
+var state={systemOn:false,trip:false,mode:"AUTO",filling:false,manualFill:false,manualDrain:false,level:55,temperature:38,flow:0,pressure:2.1,energy:0,volume:0,runtime:0,cycles:0,alarmAck:false,history:[],events:[],alarms:[],activeAlarmKeys:{},currentAlarms:[],setpoints:{low:20,high:85,highAlarm:90,tempAlarm:60,pressureAlarm:3.2},speed:1,fault:"none"}
+function addEvent(text,type){state.events.unshift({time:nowTime(),text:text,type:type||"ok"});if(state.events.length>80)state.events.pop()}
+function addAlarmHistory(text,type){state.alarms.unshift({time:nowTime(),text:text,type:type||"alarm"});if(state.alarms.length>100)state.alarms.pop()}
+function isPumpOn(){return state.filling||state.manualFill}
+function cycleText(){if(state.trip)return "BLOQUEO POR EMERGENCIA";if(!state.systemOn)return "ESPERA";if(state.mode==="AUTO"&&state.filling)return "LLENADO AUTOMÁTICO";if(state.mode==="AUTO")return "DESCARGA AUTOMÁTICA";if(state.manualFill)return "LLENADO MANUAL";if(state.manualDrain)return "DESCARGA MANUAL";return "MANUAL EN ESPERA"}
+function login(){var user=$("loginUser").value.trim().toLowerCase(),pass=$("loginPass").value.trim();if(user==="admin"&&pass==="admin123"){$("loginScreen").classList.add("hidden");$("mainApp").classList.remove("hidden");$("loginError").textContent="";addEvent("Ingreso correcto al sistema.","ok");evaluateAlarms();render()}else{$("loginError").textContent="Usuario o contraseña incorrectos. Escriba admin / admin123"}}
+function logout(){$("mainApp").classList.add("hidden");$("loginScreen").classList.remove("hidden");$("loginPass").value=""}
+function showView(viewId){document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active")});document.querySelectorAll(".nav-btn").forEach(function(b){b.classList.remove("active")});$(viewId).classList.add("active");var btn=document.querySelector('[data-view="'+viewId+'"]');if(btn)btn.classList.add("active");drawTrend()}
+function startSystem(){if(state.trip){addEvent("No se puede iniciar: existe bloqueo por emergencia.","trip");render();return}state.systemOn=true;state.alarmAck=false;addEvent("Sistema iniciado por el operador.","ok");render()}
+function stopSystem(){state.systemOn=false;state.filling=false;state.manualFill=false;state.manualDrain=false;state.flow=0;addEvent("Sistema detenido por el operador.","warning");evaluateAlarms();render()}
+function emergencyStop(){state.trip=true;state.systemOn=false;state.filling=false;state.manualFill=false;state.manualDrain=false;state.flow=0;addEvent("PARADA DE EMERGENCIA ACTIVADA.","trip");evaluateAlarms();render()}
+function resetTrip(){state.trip=false;state.alarmAck=false;addEvent("Bloqueo de emergencia reiniciado.","ok");evaluateAlarms();render()}
+function toggleMode(){if(state.mode==="AUTO"){state.mode="MANUAL";state.filling=false;state.manualFill=false;state.manualDrain=false;addEvent("Modo manual activado.","warning")}else{state.mode="AUTO";state.manualFill=false;state.manualDrain=false;addEvent("Modo automático activado.","ok")}render()}
+function toggleManualFill(){if(!state.systemOn||state.mode!=="MANUAL")return;state.manualFill=!state.manualFill;if(state.manualFill){state.manualDrain=false;addEvent("Llenado manual activado.","ok")}else addEvent("Llenado manual desactivado.","warning");render()}
+function toggleManualDrain(){if(!state.systemOn||state.mode!=="MANUAL")return;state.manualDrain=!state.manualDrain;if(state.manualDrain){state.manualFill=false;addEvent("Descarga manual activada.","warning")}else addEvent("Descarga manual desactivada.","ok");render()}
+function saveConfig(){var low=Number($("lowSetpoint").value),high=Number($("highSetpoint").value);if(low>=high){alert("El nivel mínimo debe ser menor que el nivel máximo.");return}state.setpoints.low=clamp(low,5,40);state.setpoints.high=clamp(high,60,95);state.setpoints.highAlarm=clamp(Number($("highAlarmSetpoint").value),70,100);state.setpoints.tempAlarm=clamp(Number($("tempAlarmSetpoint").value),40,90);state.speed=Number($("speedSelect").value);state.fault=$("faultSelect").value;addEvent("Configuración actualizada.","ok");evaluateAlarms();render()}
+function acknowledgeAlarms(){state.alarmAck=true;addEvent("Alarmas reconocidas por el operador.","ok");render()}
+function simulate(){var dt=state.speed;$("clock").textContent=nowDateTime();if(state.systemOn&&!state.trip){state.runtime+=dt;if(state.mode==="AUTO"){var prev=state.filling;if(state.level<=state.setpoints.low)state.filling=true;if(state.level>=state.setpoints.high){state.filling=false;if(prev){state.cycles++;addEvent("Ciclo automático completado.","ok")}}if(prev!==state.filling){if(state.filling)addEvent("Nivel mínimo alcanzado. Inicia llenado automático.","warning");else addEvent("Nivel máximo alcanzado. Se detiene llenado.","ok")}if(state.filling){state.level+=random(1.0,1.8)*dt;state.flow=random(11,16)}else{state.level-=random(.42,.9)*dt;state.flow=random(4,8)}}else{if(state.manualFill){state.level+=random(1.0,2.0)*dt;state.flow=random(10,16)}else if(state.manualDrain){state.level-=random(.8,1.6)*dt;state.flow=random(6,11)}else{state.level-=random(.08,.25)*dt;state.flow=random(0,.4)}}state.temperature+=random(-.12,.25)*dt;state.volume+=state.flow/60*dt;if(isPumpOn())state.energy+=0.0022*dt}else{state.flow=0;state.temperature+=random(-.04,.04)}if(state.fault==="flow"&&isPumpOn())state.flow=0;if(state.fault==="temp")state.temperature+=.9*dt;if(state.fault==="pressure")state.pressure=3.45+random(0,.3);state.level=clamp(state.level,0,100);state.temperature=clamp(state.temperature,25,85);if(state.fault!=="pressure"){state.pressure=.65+state.level*.026+(isPumpOn()?.35:0)+(state.manualDrain?.1:0)+random(-.04,.04)}state.pressure=clamp(state.pressure,.4,4.5);pushHistory();evaluateAlarms();render()}
+function pushHistory(){state.history.push({time:nowTime(),level:+state.level.toFixed(1),temperature:+state.temperature.toFixed(1),flow:+state.flow.toFixed(1),pressure:+state.pressure.toFixed(2),energy:+state.energy.toFixed(3)});if(state.history.length>100)state.history.shift()}
+function evaluateAlarms(){var alarms=[];if(state.trip)alarms.push({key:"trip",title:"Parada de emergencia",desc:"Sistema bloqueado por emergencia.",severity:"trip"});if(!state.systemOn&&!state.trip)alarms.push({key:"systemOff",title:"Sistema detenido",desc:"El sistema no se encuentra en operación.",severity:"warning"});if(state.level>=state.setpoints.highAlarm)alarms.push({key:"levelHigh",title:"Nivel alto",desc:"El nivel superó el límite configurado.",severity:"danger"});if(state.level<=state.setpoints.low)alarms.push({key:"levelLow",title:"Nivel bajo",desc:"El tanque llegó al nivel mínimo.",severity:"warning"});if(state.temperature>=state.setpoints.tempAlarm)alarms.push({key:"tempHigh",title:"Temperatura alta",desc:"La temperatura superó el límite permitido.",severity:"danger"});if(state.pressure>=state.setpoints.pressureAlarm)alarms.push({key:"pressureHigh",title:"Sobrepresión",desc:"La presión está por encima del límite.",severity:"danger"});if(state.systemOn&&isPumpOn()&&state.flow<1)alarms.push({key:"flowFail",title:"Falla de caudal",desc:"La bomba está activa, pero no hay caudal suficiente.",severity:"danger"});var next={};alarms.forEach(function(a){next[a.key]=true;if(!state.activeAlarmKeys[a.key])addAlarmHistory(a.title+": "+a.desc,a.severity==="danger"?"alarm":a.severity==="trip"?"trip":"warning")});Object.keys(state.activeAlarmKeys).forEach(function(k){if(!next[k])addAlarmHistory("Alarma normalizada: "+k,"ok")});state.activeAlarmKeys=next;state.currentAlarms=alarms}
+function varColor(value,type){if(type==="level"){if(value>=state.setpoints.highAlarm)return "var(--red)";if(value<=state.setpoints.low)return "var(--yellow)";return "var(--green)"}if(type==="temperature"){if(value>=state.setpoints.tempAlarm)return "var(--red)";if(value>=state.setpoints.tempAlarm-8)return "var(--yellow)";return "var(--green)"}if(type==="pressure"){if(value>=state.setpoints.pressureAlarm)return "var(--red)";if(value>=state.setpoints.pressureAlarm-.35)return "var(--yellow)";return "var(--green)"}return "var(--green)"}
+function setBar(id,value,max,type){var b=$(id);b.style.width=clamp(value/max*100,0,100)+"%";b.style.background=varColor(value,type)}
+function render(){$("levelText").textContent=state.level.toFixed(0)+"%";$("tempText").textContent=state.temperature.toFixed(1)+" °C";$("flowText").textContent=state.flow.toFixed(1)+" L/min";$("pressureText").textContent=state.pressure.toFixed(2)+" bar";$("energyText").textContent=state.energy.toFixed(3)+" kWh";$("lowSpText").textContent=state.setpoints.low+"%";$("tempSpText").textContent=state.setpoints.tempAlarm+" °C";setBar("levelBar",state.level,100,"level");setBar("tempBar",state.temperature,80,"temperature");setBar("flowBar",state.flow,20,"flow");setBar("pressureBar",state.pressure,4,"pressure");setBar("energyBar",Math.min(state.energy,1),1,"energy");$("water").style.height=state.level+"%";$("tankPercent").textContent=state.level.toFixed(0)+"%";$("systemText").textContent=state.trip?"BLOQUEADO":state.systemOn?"EN OPERACIÓN":"DETENIDO";$("modeText").textContent=state.mode;$("cycleText").textContent=cycleText();$("pumpInText").textContent=isPumpOn()?"ON":"OFF";$("valveInText").textContent=isPumpOn()?"ABIERTA":"CERRADA";$("valveOutText").textContent=isPumpOn()?"CERRADA":"ABIERTA";$("tablePump").textContent=isPumpOn()?"ON":"OFF";$("tableValveIn").textContent=isPumpOn()?"ABIERTA":"CERRADA";$("tableValveOut").textContent=isPumpOn()?"CERRADA":"ABIERTA";$("modeBtn").textContent=state.mode==="AUTO"?"CAMBIAR A MODO MANUAL":"CAMBIAR A MODO AUTOMÁTICO";$("manualFillBtn").disabled=!(state.systemOn&&state.mode==="MANUAL"&&!state.trip);$("manualDrainBtn").disabled=!(state.systemOn&&state.mode==="MANUAL"&&!state.trip);$("manualFillBtn").textContent=state.manualFill?"DETENER LLENADO MANUAL":"LLENADO MANUAL";$("manualDrainBtn").textContent=state.manualDrain?"DETENER DESCARGA MANUAL":"DESCARGA MANUAL";$("cycleCounterText").textContent=state.cycles;$("runtimeText").textContent=fmtHMS(state.runtime);$("volumeText").textContent=state.volume.toFixed(1)+" L";$("performanceText").textContent=state.trip?"Bloqueado":state.currentAlarms.some(function(a){return a.severity==="danger"})?"Crítico":state.currentAlarms.length?"Advertencia":"Normal";renderStatus();renderLogs();renderAlarmCards();renderTrendStats();drawTrend()}
+function renderStatus(){var hasTrip=state.currentAlarms.some(function(a){return a.severity==="trip"}),hasDanger=state.currentAlarms.some(function(a){return a.severity==="danger"}),hasWarning=state.currentAlarms.some(function(a){return a.severity==="warning"});var text="NORMAL",cls="status-pill status-normal",water="linear-gradient(180deg,#30e978,#16a34a)";if(hasTrip){text="BLOQUEO";cls="status-pill status-trip";water="linear-gradient(180deg,#c084fc,#7c3aed)"}else if(hasDanger){text="ALARMA";cls="status-pill status-alarm";water="linear-gradient(180deg,#fb7185,#dc2626)"}else if(hasWarning){text="ADVERTENCIA";cls="status-pill status-warning";water="linear-gradient(180deg,#fde047,#f97316)"}$("generalStatus").textContent=text;$("generalStatus").className=cls;$("tankStatus").textContent=text;$("tankStatus").className=cls;$("water").style.background=water}
+function renderLogs(){$("eventLog").innerHTML=state.events.length?state.events.map(function(i){return '<div class="log-item log-'+i.type+'"><span class="log-time">'+i.time+'</span>'+i.text+'</div>'}).join(""):'<div class="log-item">Sin eventos registrados.</div>';$("alarmLog").innerHTML=state.alarms.length?state.alarms.map(function(i){return '<div class="log-item log-'+i.type+'"><span class="log-time">'+i.time+'</span>'+i.text+'</div>'}).join(""):'<div class="log-item">Sin alarmas registradas.</div>'}
+function renderAlarmCards(){var list=[{title:"Parada emergencia",desc:"Bloqueo por seguridad hasta reinicio.",active:state.trip,severity:"trip"},{title:"Nivel alto",desc:"Alarma cuando el nivel supera "+state.setpoints.highAlarm+"%.",active:state.level>=state.setpoints.highAlarm,severity:"danger"},{title:"Nivel bajo",desc:"Advertencia cuando el nivel llega a "+state.setpoints.low+"%.",active:state.level<=state.setpoints.low,severity:"warning"},{title:"Temperatura alta",desc:"Alarma cuando supera "+state.setpoints.tempAlarm+" °C.",active:state.temperature>=state.setpoints.tempAlarm,severity:"danger"},{title:"Sobrepresión",desc:"Alarma cuando la presión supera 3.2 bar.",active:state.pressure>=state.setpoints.pressureAlarm,severity:"danger"},{title:"Falla de caudal",desc:"Bomba activa y caudal insuficiente.",active:state.systemOn&&isPumpOn()&&state.flow<1,severity:"danger"},{title:"Sistema detenido",desc:"Proceso sin operación.",active:!state.systemOn&&!state.trip,severity:"warning"}];$("alarmCards").innerHTML=list.map(function(a){var cls="alarm-card alarm-normal",badge="badge badge-green",label="NORMAL";if(a.active&&a.severity==="trip"){cls="alarm-card alarm-danger";badge="badge badge-purple";label="BLOQUEO"}else if(a.active&&a.severity==="danger"){cls="alarm-card alarm-danger";badge="badge badge-red";label=state.alarmAck?"RECONOCIDA":"ACTIVA"}else if(a.active&&a.severity==="warning"){cls="alarm-card alarm-warning";badge="badge badge-yellow";label=state.alarmAck?"RECONOCIDA":"ADVERTENCIA"}return '<div class="'+cls+'"><span class="'+badge+'">'+label+'</span><h4>'+a.title+'</h4><p>'+a.desc+'</p></div>'}).join("")}
+function renderTrendStats(){$("sampleText").textContent=state.history.length;if(!state.history.length){$("minLevelText").textContent="--%";$("maxLevelText").textContent="--%";$("trendStateText").textContent="--";return}var levels=state.history.map(function(h){return h.level});$("minLevelText").textContent=Math.min.apply(null,levels).toFixed(0)+"%";$("maxLevelText").textContent=Math.max.apply(null,levels).toFixed(0)+"%";$("trendStateText").textContent=cycleText().replace("AUTOMÁTICO","AUTO")}
+function drawTrend(){var canvas=$("trendCanvas");if(!canvas)return;var ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--bg2').trim()||"#07111d";ctx.fillRect(0,0,w,h);ctx.strokeStyle="rgba(148,163,184,.28)";ctx.lineWidth=1;for(var i=0;i<=5;i++){var y=35+i*((h-70)/5);ctx.beginPath();ctx.moveTo(55,y);ctx.lineTo(w-25,y);ctx.stroke()}ctx.strokeStyle="rgba(148,163,184,.60)";ctx.beginPath();ctx.moveTo(55,25);ctx.lineTo(55,h-35);ctx.lineTo(w-25,h-35);ctx.stroke();var variable=$("chartVariable").value;var ranges={level:{min:0,max:100,label:"Nivel (%)"},temperature:{min:20,max:90,label:"Temperatura (°C)"},flow:{min:0,max:20,label:"Caudal (L/min)"},pressure:{min:0,max:4.5,label:"Presión (bar)"},energy:{min:0,max:Math.max(1,state.energy+.2),label:"Energía (kWh)"}};var info=ranges[variable];ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--text').trim()||"#fff";ctx.font="bold 14px Arial";ctx.fillText(info.label,60,20);ctx.fillStyle="#8fa6bd";ctx.font="12px Arial";for(var j=0;j<=5;j++){var val=info.max-j*((info.max-info.min)/5),yy=35+j*((h-70)/5);ctx.fillText(val.toFixed(variable==="pressure"||variable==="energy"?2:0),10,yy+4)}if(state.history.length<2)return;ctx.strokeStyle="#38bdf8";ctx.lineWidth=3;ctx.beginPath();state.history.forEach(function(p,index){var x=55+index*((w-90)/99),value=p[variable],yy=h-35-((value-info.min)/(info.max-info.min))*(h-70);if(index===0)ctx.moveTo(x,yy);else ctx.lineTo(x,yy)});ctx.stroke();var last=state.history[state.history.length-1],lastX=55+(state.history.length-1)*((w-90)/99),lastY=h-35-((last[variable]-info.min)/(info.max-info.min))*(h-70);ctx.fillStyle="#38bdf8";ctx.beginPath();ctx.arc(lastX,lastY,5,0,Math.PI*2);ctx.fill();ctx.fillStyle="#9fb6ca";ctx.font="11px Arial";ctx.fillText(state.history[0].time,55,h-10);ctx.fillText(last.time,w-95,h-10)}
+function downloadCsv(){var csv="hora,nivel,temperatura,caudal,presion,energia\n";state.history.forEach(function(r){csv+=r.time+","+r.level+","+r.temperature+","+r.flow+","+r.pressure+","+r.energy+"\n"});var blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="historial_hmi_scada_tanque_pro.csv";a.click();URL.revokeObjectURL(url);addEvent("Historial exportado en CSV.","ok");render()}
+function resetHistory(){state.history=[];state.events=[];state.alarms=[];state.activeAlarmKeys={};addEvent("Historial limpiado por operador.","warning");evaluateAlarms();render()}
+function toggleTheme(){document.body.classList.toggle("light");drawTrend()}
+function init(){$("loginBtn").addEventListener("click",login);$("fillLoginBtn").addEventListener("click",function(){$("loginUser").value="admin";$("loginPass").value="admin123"});$("loginPass").addEventListener("keydown",function(e){if(e.key==="Enter")login()});$("loginUser").addEventListener("keydown",function(e){if(e.key==="Enter")login()});$("logoutBtn").addEventListener("click",logout);$("themeBtn").addEventListener("click",toggleTheme);document.querySelectorAll(".nav-btn").forEach(function(btn){btn.addEventListener("click",function(){showView(btn.getAttribute("data-view"))})});$("startBtn").addEventListener("click",startSystem);$("stopBtn").addEventListener("click",stopSystem);$("modeBtn").addEventListener("click",toggleMode);$("manualFillBtn").addEventListener("click",toggleManualFill);$("manualDrainBtn").addEventListener("click",toggleManualDrain);$("emergencyBtn").addEventListener("click",emergencyStop);$("resetTripBtn").addEventListener("click",resetTrip);$("saveSpBtn").addEventListener("click",saveConfig);$("ackBtn").addEventListener("click",acknowledgeAlarms);$("downloadCsvBtn").addEventListener("click",downloadCsv);$("resetHistoryBtn").addEventListener("click",resetHistory);$("chartVariable").addEventListener("change",drawTrend);for(var i=0;i<10;i++)pushHistory();addEvent("Sistema HMI/SCADA PRO inicializado correctamente.","ok");evaluateAlarms();render();setInterval(simulate,1000)}
+document.addEventListener("DOMContentLoaded",init)
+})();
 </script>
-
 </body>
 </html>
